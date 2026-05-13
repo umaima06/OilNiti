@@ -1,0 +1,10 @@
+parameter,value,source
+price_elasticity_demand_palm,-0.65,ICAR 2022
+price_elasticity_supply_domestic,0.45,NITI Aayog 2021
+import_volume_elasticity,-1.2,SEA India 2023
+cross_price_elasticity_mustard,0.38,ICAR 2022
+cross_price_elasticity_soybean,0.28,ICAR 2022
+cross_price_elasticity_sunflower,0.22,ICAR 2022
+pass_through_rate,0.72,RBI Working Paper 2023
+msp_mustard_rs_quintal,5650,GOI 2024-25
+domestic_production_share,0.35,USDA 2024

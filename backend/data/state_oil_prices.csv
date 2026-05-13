@@ -1,0 +1,20 @@
+state,region,avg_palm_retail_rs_kg,avg_mustard_retail_rs_kg,avg_soybean_retail_rs_kg,monthly_hh_income_rs,farmer_hh_pct,oilseed_farmers_lakh,avg_farmer_income_rs_yr
+Rajasthan,North,130,145,135,12000,62,42.3,95000
+Madhya Pradesh,Central,128,142,132,11000,58,38.1,88000
+Uttar Pradesh,North,132,148,138,10500,55,31.2,82000
+Haryana,North,135,150,140,18000,45,8.4,125000
+Punjab,North,138,152,142,22000,38,4.2,140000
+Maharashtra,West,140,158,145,15000,42,18.6,98000
+Gujarat,West,136,150,140,16000,40,12.3,105000
+Karnataka,South,135,155,142,13500,38,9.1,92000
+Andhra Pradesh,South,132,150,138,12500,44,7.8,89000
+Telangana,South,133,152,140,14000,40,6.2,91000
+Tamil Nadu,South,136,155,142,14500,32,3.1,94000
+Kerala,South,145,165,150,18000,28,1.2,110000
+West Bengal,East,130,145,132,10000,50,8.9,78000
+Bihar,East,128,142,130,8500,60,6.4,72000
+Odisha,East,129,144,133,9000,52,4.8,75000
+Jharkhand,East,127,140,130,9500,55,3.2,73000
+Chhattisgarh,Central,126,140,130,9000,56,4.1,74000
+Delhi,North,142,160,148,35000,5,0.1,180000
+Mumbai,West,144,162,150,40000,4,0.1,200000
