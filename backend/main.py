@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from models.causal_engine import OilNitiEngine
 from utils.backtester import run_sept_2024_backtest
+from routes.live_price import get_live_cpo_price
 import os
 from dotenv import load_dotenv
 from groq import Groq
@@ -160,3 +161,8 @@ Tone: Formal, factual, government-style. Use Rs symbol. Keep each section to 4-5
         "generated_at": "2026-05-13",
         "model": "llama-3.1-8b-instant"
     }
+    
+@app.get("/live-price")
+def live_price():
+    """Return current global CPO price with trend"""
+    return get_live_cpo_price()

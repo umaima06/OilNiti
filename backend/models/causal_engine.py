@@ -23,6 +23,11 @@ class OilNitiEngine:
         Core simulation engine.
         Returns full prediction dict for frontend consumption.
         """
+        # Guard against extreme inputs
+        new_cpo_duty = max(0.0, min(100.0, new_cpo_duty))
+        new_rpo_duty = max(0.0, min(100.0, new_rpo_duty))
+        global_cpo_shock_pct = max(-50.0, min(100.0, global_cpo_shock_pct))
+        
         # --- STEP 1: Duty delta ---
         delta_cpo = new_cpo_duty - self.baseline_cpo_duty
         delta_rpo = new_rpo_duty - self.baseline_rpo_duty
@@ -44,7 +49,10 @@ class OilNitiEngine:
         global_price_impact_pct = (global_cpo_shock_pct * pass_through * 0.6)
         
         total_price_change_pct = duty_price_impact_pct + global_price_impact_pct
-        new_domestic_price = self.baseline_domestic_palm_price * (1 + total_price_change_pct / 100)
+        new_domestic_price = max(
+            50.0,  # price can never go below ₹50/kg (floor)
+            self.baseline_domestic_palm_price * (1 + total_price_change_pct / 100)
+        )
 
         # --- STEP 5: Import volume change ---
         import_elasticity = float(self.elasticities["import_volume_elasticity"])
@@ -149,7 +157,9 @@ class OilNitiEngine:
             # Farmer impact (mustard/oilseed farmers gain when palm gets expensive)
             msp_mustard = float(self.elasticities["msp_mustard_rs_quintal"])
             market_price_change_rs_quintal = (mustard_price_change_pct / 100) * (row["avg_mustard_retail_rs_kg"] * 100)
-            annual_farmer_income_delta = market_price_change_rs_quintal * 8  # avg 8 quintals/acre, ~2 acres avg
+            annual_farmer_income_delta = market_price_change_rs_quintal * 8 # Sanitize any NaN/inf values
+            if not isinstance(annual_farmer_income_delta, (int, float)) or annual_farmer_income_delta != annual_farmer_income_delta:
+                annual_farmer_income_delta = 0.0
 
             # Net impact score: positive = farmers win more than consumers lose
             net_score = (annual_farmer_income_delta / 12) - abs(monthly_cost_delta)
