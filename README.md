@@ -46,14 +46,15 @@ oilniti/
 
 ---
 
-## Day 1 Setup — Backend
+## Installation & Setup
 
-### Prerequisites
+### 1. Backend Setup
+
+#### Prerequisites
 - Python 3.10+
-- Node.js 18+ (for frontend, Day 2)
 - VS Code
 
-### Installation
+#### Installation
 
 ```bash
 cd backend
@@ -62,19 +63,47 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
-### Environment Variables
+#### Environment Variables
 
 Create `backend/.env`:
 GROQ_API_KEY=your_groq_api_key_here
 Get your free Groq API key at: https://console.groq.com
 
-### Run the server
+#### Run the server
 
 ```bash
 uvicorn main:app --reload --port 8000
 ```
 
 API docs available at: http://localhost:8000/docs
+
+---
+
+### 2. Frontend Setup
+
+#### Prerequisites
+- Node.js 18+
+
+#### Installation
+
+```bash
+cd frontend
+npm install
+```
+
+**Dependencies Included:**
+- `react`, `react-dom` — Core React framework
+- `@tailwindcss/vite`, `tailwindcss` — Utility-first styling (v4)
+- `recharts` — Price trajectory visualizations
+- `react-simple-maps`, `topojson-client` — India choropleth map rendering
+
+#### Run the dashboard
+
+```bash
+npm run dev
+```
+
+The OilNiti dashboard will be available at: http://localhost:5173
 
 ---
 
