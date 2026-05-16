@@ -1,3 +1,5 @@
+//App.jsx
+
 import React from 'react';
 import { SimulationProvider } from './context/SimulationContext';
 import Header from './components/Header';
@@ -5,7 +7,10 @@ import TariffControlPanel from './components/TariffControlPanel';
 import PriceImpactPanel from './components/PriceImpactPanel';
 import HumanFacePanel from './components/HumanFacePanel';
 import ConscienceDashboard from './components/ConscienceDashboard';
+import DutyHistoryChart from './components/DutyHistoryChart';
+import NitiBot from './components/NitiBot';
 import ErrorToast from './components/ErrorToast';
+import BacktestStrip from './components/BacktestStrip';
 
 const SectionDivider = ({ panelNum, label }) => (
   <div style={{
@@ -78,7 +83,7 @@ function App() {
                   letterSpacing: '0.04em',
                   maxWidth: 600,
                 }}>
-                  Adjust CPO &amp; RPO import duties → model price impacts → quantify farmer welfare &amp; consumer burden across India's 28 states.
+                  Adjust CPO &amp; RPO import duties → model price impacts → quantify farmer welfare &amp; consumer burden across India's 36 states &amp; UTs.
                 </p>
               </div>
 
@@ -95,7 +100,7 @@ function App() {
                   { value: '₹1.5L Cr', label: 'Palm oil market' },
                   { value: '8 Crore', label: 'Farm families' },
                   { value: '140 Cr', label: 'Consumers' },
-                  { value: '45%', label: 'Import dependency' },
+                  { value: '36', label: 'States & UTs' },
                 ].map((stat) => (
                   <div key={stat.label} style={{
                     padding: '14px 20px',
@@ -144,6 +149,9 @@ function App() {
           <SectionDivider panelNum="04" label="AI Conscience" />
           <ConscienceDashboard />
 
+          <SectionDivider panelNum="05" label="Historical Context" />
+          <DutyHistoryChart />
+
           {/* Footer */}
           <footer style={{
             marginTop: 60,
@@ -155,25 +163,18 @@ function App() {
             flexWrap: 'wrap',
             gap: 16,
           }}>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.15)',
-              letterSpacing: '0.1em',
-            }}>
-              OILNITI · SUMMERSAAS 2026 · OPEN INNOVATION TRACK<br />
-              Simulation results are model-generated estimates for policy analysis purposes only.
-            </div>
+            <BacktestStrip />
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10,
               color: 'rgba(255,255,255,0.1)',
             }}>
-              Built with ♥ for Indian farmers &amp; consumers
+              Built with ♥ for Indian Kisans &amp; Ghars · SummerSaaS 2026
             </div>
           </footer>
         </main>
 
+        <NitiBot />
         <ErrorToast />
       </div>
     </SimulationProvider>

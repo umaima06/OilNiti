@@ -1,3 +1,5 @@
+//SkeletonLoader.jsx
+
 import React from 'react';
 
 const SkeletonLoader = ({ width = '100%', height = 20, className = '' }) => (

@@ -1,11 +1,14 @@
+//TariffControlPanel.jsx
+
 import React, { useState, useCallback } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 
 const PRESETS = [
-  { id: 'ukraine', label: 'Ukraine War 2022', emoji: '🔴', cpo: 5.5, rpo: 5.5 },
-  { id: 'indonesia', label: 'Indonesia Export Ban', emoji: '🟡', cpo: 100, rpo: 13.75 },
-  { id: 'budget2025', label: 'Budget 2025 Actual', emoji: '🟢', cpo: 20, rpo: 32.5 },
-  { id: 'default', label: 'Reset to Default', emoji: '⚪', cpo: 100, rpo: 13.75 },
+  { id: 'ukraine', label: 'Ukraine War 2022', emoji: '🔴', cpo: 5.0, rpo: 12.5, shock: 40.0 },
+  { id: 'indonesia', label: 'Indonesia Export Ban', emoji: '🟡', cpo: 5.0, rpo: 12.5, shock: 28.0 },
+  { id: 'budget2024', label: 'Sept 2024 Duty Hike', emoji: '🟢', cpo: 27.5, rpo: 37.5, shock: 0.0 },
+  { id: 'zero_duty', label: 'Zero Duty Scenario', emoji: '⚪', cpo: 0.0, rpo: 0.0, shock: 0.0 },
+  { id: 'default', label: 'Reset to Current', emoji: '🔵', cpo: 20.0, rpo: 32.5, shock: 0.0 },
 ];
 
 const SliderControl = ({ label, subLabel, value, min, max, step = 0.25, onChange, color = '#f59e0b' }) => {
@@ -108,6 +111,7 @@ const TariffControlPanel = () => {
   const {
     cpoDuty, setCpoDuty,
     rpoDuty, setRpoDuty,
+    globalShock, setGlobalShock,
     runSimulation,
     isLoading,
     activePreset,
@@ -119,15 +123,15 @@ const TariffControlPanel = () => {
   const [localPreset, setLocalPreset] = useState(null);
 
   const handlePreset = useCallback((preset) => {
-    const { cpo, rpo } = applyPreset(preset.id);
+    const { cpo, rpo, shock } = applyPreset(preset.id);
     setLocalPreset(preset.id);
     // Auto-trigger simulation after a tick
-    setTimeout(() => runSimulation(cpo, rpo), 50);
+    setTimeout(() => runSimulation(cpo, rpo, shock), 50);
   }, [applyPreset, runSimulation]);
 
   const handleSimulate = () => {
     setLocalPreset(null);
-    runSimulation();
+    runSimulation(cpoDuty, rpoDuty, globalShock);
   };
 
   return (
@@ -217,8 +221,41 @@ const TariffControlPanel = () => {
               max={100}
               step={0.25}
               onChange={setRpoDuty}
-              color="#3b82f6"
+              color="#6366f1"
             />
+          </div>
+        </div>
+
+        {/* Global Shock Slider */}
+        <div style={{
+          marginBottom: 32,
+          padding: '20px 24px',
+          borderRadius: 12,
+          background: 'rgba(239,68,68,0.04)',
+          border: '1px solid rgba(239,68,68,0.15)',
+        }}>
+          <SliderControl
+            label="Global CPO Price Shock"
+            subLabel="External · Supply chain disruptions, war, export bans"
+            value={globalShock}
+            min={-30}
+            max={60}
+            step={1}
+            onChange={setGlobalShock}
+            color="#ef4444"
+          />
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 10,
+            color: 'rgba(255,255,255,0.25)',
+            marginTop: 8,
+            letterSpacing: '0.05em',
+          }}>
+            {globalShock > 0
+              ? `⚠ Simulating a +${globalShock}% global price spike (e.g., war, export ban)`
+              : globalShock < 0
+              ? `📉 Simulating a ${globalShock}% global price drop (e.g., bumper harvest)`
+              : '→ No external shock — simulation uses only duty changes'}
           </div>
         </div>
 

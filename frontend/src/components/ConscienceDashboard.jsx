@@ -1,3 +1,4 @@
+//ConscienceDashboard.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import ScoreMeter from './ScoreMeter';
@@ -38,7 +39,7 @@ const ReportLoadingState = () => {
           width: 16,
           height: 16,
           border: '2px solid rgba(245,158,11,0.2)',
-          borderTop: '2px solid #f59e0b',
+          borderTop: '2px solid #6366f1',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
           flexShrink: 0,
@@ -46,7 +47,7 @@ const ReportLoadingState = () => {
         <div style={{
           fontFamily: "'IBM Plex Mono', monospace",
           fontSize: 12,
-          color: '#f59e0b',
+          color: '#6366f1',
           letterSpacing: '0.05em',
         }}>
           {LOADING_MESSAGES[msgIdx]}
@@ -57,7 +58,7 @@ const ReportLoadingState = () => {
           className="progress-bar-fill"
           style={{
             width: `${progress}%`,
-            background: 'linear-gradient(90deg, #f59e0b80, #f59e0b)',
+            background: 'linear-gradient(90deg, #6366f180, #6366f1)',
             transition: 'width 0.1s linear',
           }}
         />
@@ -69,7 +70,7 @@ const ReportLoadingState = () => {
         color: 'rgba(255,255,255,0.2)',
         letterSpacing: '0.08em',
       }}>
-        Powered by Gemini · OilNiti AI Engine
+        Powered by LLaMA 3.1 · OilNiti AI Engine
       </div>
     </div>
   );
@@ -187,7 +188,7 @@ const ConscienceDashboard = () => {
             <ScoreMeter
               value={atmaNirbhar}
               max={100}
-              color="#f59e0b"
+              color="#6366f1"
               label="Ātma Nirbhar Self-Reliance %"
               size={160}
               strokeWidth={14}

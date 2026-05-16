@@ -1,6 +1,15 @@
-import React from 'react';
-
+//Header.jsx
+import { useState, useEffect, React } from 'react';
 const Header = () => {
+  const [livePrice, setLivePrice] = useState(null);
+  
+  useEffect(() => {
+    fetch('http://localhost:8000/live-price')
+    .then(r => r.json())
+    .then(setLivePrice)
+    .catch(() => {});
+  }, []);
+
   return (
     <header style={{
       background: 'linear-gradient(180deg, #080c18 0%, #0a0e1a 100%)',
@@ -100,9 +109,10 @@ const Header = () => {
               fontSize: 12,
               fontWeight: 600,
               color: '#34d399',
-            }}>
-              Global CPO: ₹89.4/kg
+              }}>
+                Global CPO: ₹{livePrice?.price_inr_per_kg ?? '...'}/kg {livePrice?.trend_icon ?? ''}
             </span>
+            
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10,

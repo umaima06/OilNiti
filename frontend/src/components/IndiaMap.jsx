@@ -1,3 +1,5 @@
+//IndiaMap.jsx
+
 import React, { useState, useCallback, memo } from 'react';
 import {
   ComposableMap,
@@ -12,12 +14,16 @@ const GEO_URL = '/india-states.json';
 // Map state names from GeoJSON to our state_impact keys
 const NORMALIZE = (name) => {
   const map = {
+    // States
     'Jammu and Kashmir': 'Jammu & Kashmir',
+    'Jammu & Kashmir': 'Jammu & Kashmir',
     'Himachal Pradesh': 'Himachal Pradesh',
     'Punjab': 'Punjab',
     'Uttarakhand': 'Uttarakhand',
+    'Uttaranchal': 'Uttarakhand',
     'Haryana': 'Haryana',
     'Delhi': 'Delhi',
+    'NCT of Delhi': 'Delhi',
     'Rajasthan': 'Rajasthan',
     'Uttar Pradesh': 'Uttar Pradesh',
     'Bihar': 'Bihar',
@@ -32,6 +38,7 @@ const NORMALIZE = (name) => {
     'West Bengal': 'West Bengal',
     'Jharkhand': 'Jharkhand',
     'Odisha': 'Odisha',
+    'Orissa': 'Odisha',
     'Chhattisgarh': 'Chhattisgarh',
     'Madhya Pradesh': 'Madhya Pradesh',
     'Gujarat': 'Gujarat',
@@ -42,6 +49,23 @@ const NORMALIZE = (name) => {
     'Goa': 'Goa',
     'Kerala': 'Kerala',
     'Tamil Nadu': 'Tamil Nadu',
+    // Union Territories
+    'Ladakh': 'Ladakh',
+    'Puducherry': 'Puducherry',
+    'Pondicherry': 'Puducherry',
+    'Chandigarh': 'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu': 'Dadra Nagar Haveli',
+    'Dadra and Nagar Haveli': 'Dadra Nagar Haveli',
+    'Dadra & Nagar Haveli': 'Dadra Nagar Haveli',
+    'Daman and Diu': 'Dadra Nagar Haveli',
+    'Daman & Diu': 'Dadra Nagar Haveli',
+    'DNH and DD': 'Dadra Nagar Haveli',
+    'Andaman and Nicobar Islands': 'Andaman & Nicobar',
+    'Andaman and Nicobar': 'Andaman & Nicobar',
+    'Andaman & Nicobar Islands': 'Andaman & Nicobar',
+    'Lakshadweep': 'Lakshadweep',
+    // Mumbai is in our data but not a separate GeoJSON region
+    'Mumbai': 'Mumbai',
   };
   return map[name] || name;
 };

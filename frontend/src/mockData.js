@@ -1,3 +1,5 @@
+//mockData.js
+
 export const mockSimulationResult = {
   price_trajectory: [
     { month: 1, palm_price: 142.5, mustard_price: 178.2 },

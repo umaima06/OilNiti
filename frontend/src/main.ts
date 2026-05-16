@@ -1,3 +1,4 @@
+//main.ts
 import './style.css'
 import typescriptLogo from './assets/typescript.svg'
 import viteLogo from './assets/vite.svg'

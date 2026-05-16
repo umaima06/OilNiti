@@ -1,3 +1,5 @@
+//ScoreMeter.jsx
+
 import React, { useEffect, useRef } from 'react';
 
 const ScoreMeter = ({ value = 0, max = 100, color = '#f59e0b', label = '', size = 160, strokeWidth = 12 }) => {

@@ -1,6 +1,7 @@
-@import "tailwindcss";
+/*index.css*/
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@300;400;600;700;800&family=Playfair+Display:wght@700;800&display=swap');
+@import "tailwindcss";
 
 :root {
   --navy: #0a0e1a;
@@ -22,8 +23,13 @@
   --crimson: #ef4444;
   --crimson-light: #f87171;
   --crimson-dim: #7f1d1d;
-  --blue: #3b82f6;
+  --indigo: #6366f1;
   --blue-light: #60a5fa;
+  --indigo: #6366f1;
+  --indigo-light: #818cf8;
+  --indigo-dim: #1e1b4b;
+  --purple: #a855f7;
+  --purple-light: #c084fc;
 }
 
 * {
@@ -138,33 +144,33 @@ input[type=range]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--amber);
+  background: var(--indigo);
   border: 3px solid var(--navy);
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
   transition: box-shadow 0.2s;
 }
 
 input[type=range]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.8);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.8);
 }
 
 input[type=range]::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--amber);
+  background: var(--indigo);
   border: 3px solid var(--navy);
   cursor: pointer;
 }
 
 /* Filled track trick via gradient */
-input[type=range].amber-track { accent-color: var(--amber); }
+input[type=range].indigo-track { accent-color: var(--indigo); }
 
 /* Button styles */
 .btn-primary {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #0a0e1a;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #ffffff;
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
   font-size: 14px;
@@ -180,12 +186,12 @@ input[type=range].amber-track { accent-color: var(--amber); }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
 }
 
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .btn-primary:disabled {
@@ -206,9 +212,9 @@ input[type=range].amber-track { accent-color: var(--amber); }
 }
 
 .btn-ghost:hover {
-  border-color: var(--amber);
-  color: var(--amber);
-  background: rgba(245, 158, 11, 0.05);
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: rgba(99, 102, 241, 0.05);
 }
 
 /* Toast */
@@ -325,4 +331,107 @@ input[type=range].amber-track { accent-color: var(--amber); }
 
 .rsm-geography:hover {
   cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLES — Ctrl+P produces a clean government-style PDF
+   Only the PolicyReport section is shown; everything else is hidden.
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  /* Hide everything except the report */
+  header,
+  nav,
+  .live-dot,
+  .toast,
+  .btn-primary,
+  .btn-ghost,
+  .preset-pill,
+  .skeleton,
+  .progress-bar-track,
+  .error-toast,
+  input[type=range],
+  footer {
+    display: none !important;
+  }
+
+  /* Hide all panels except the report's parent */
+  #control,
+  #impact,
+  #human {
+    display: none !important;
+  }
+
+  /* The AI Conscience panel: hide score meters and buttons, show only report */
+  #conscience .score-meters,
+  #conscience .meter-divider,
+  #conscience .btn-primary,
+  #conscience .btn-ghost {
+    display: none !important;
+  }
+
+  /* Hide duty history chart */
+  section:has(.recharts-wrapper) {
+    display: none !important;
+  }
+
+  /* Hide section dividers and hero banner */
+  [style*="borderBottom: 1px solid #1e2d45"],
+  [style*="background: linear-gradient(180deg, #080c18"] {
+    display: none !important;
+  }
+
+  /* Reset page background to white */
+  html, body, #root, #root > div {
+    background: white !important;
+    color: black !important;
+    min-height: auto !important;
+  }
+
+  /* Panel card — remove dark styling */
+  .panel-card {
+    background: white !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Section labels — hide panel numbers */
+  .section-label {
+    display: none !important;
+  }
+
+  /* The report itself — ensure it prints clean */
+  .report-section {
+    page-break-inside: avoid;
+    border-color: #d1d5db !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 1.5cm 2cm;
+    size: A4;
+  }
+
+  /* Prevent color-adjust issues */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force text to be dark */
+  .report-section p,
+  .report-section td,
+  .report-section th,
+  .report-section div {
+    color: #111827 !important;
+  }
+
+  /* Tables in report */
+  .report-section table {
+    page-break-inside: avoid;
+  }
+
+  .report-section th {
+    background: #f3f4f6 !important;
+  }
 }

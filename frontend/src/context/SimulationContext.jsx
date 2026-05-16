@@ -1,12 +1,15 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+//SimulationContext.jsx
+
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { mockSimulationResult, mockPolicyReport } from '../mockData';
 import { transformSimulationResponse, transformReportResponse } from '../utils/transformers';
 
 const SimulationContext = createContext(null);
 
 export const SimulationProvider = ({ children }) => {
-  const [cpoDuty, setCpoDuty] = useState(100);
-  const [rpoDuty, setRpoDuty] = useState(13.75);
+  const [cpoDuty, setCpoDuty] = useState(20);
+  const [rpoDuty, setRpoDuty] = useState(32.5);
+  const [globalShock, setGlobalShock] = useState(0);
   const [simulationResult, setSimulationResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [policyReport, setPolicyReport] = useState(null);
@@ -14,7 +17,7 @@ export const SimulationProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [activePreset, setActivePreset] = useState('default');
 
-  const runSimulation = useCallback(async (cpo = cpoDuty, rpo = rpoDuty) => {
+  const runSimulation = useCallback(async (cpo = cpoDuty, rpo = rpoDuty, shock = globalShock) => {
     setIsLoading(true);
     setError(null);
     setPolicyReport(null);
@@ -22,7 +25,7 @@ export const SimulationProvider = ({ children }) => {
       const res = await fetch('http://localhost:8000/simulate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cpo_duty: cpo, rpo_duty: rpo }),
+        body: JSON.stringify({ cpo_duty: cpo, rpo_duty: rpo, global_cpo_shock_pct: shock }),
       });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const raw = await res.json();
@@ -34,7 +37,7 @@ export const SimulationProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [cpoDuty, rpoDuty]);
+  }, [cpoDuty, rpoDuty, globalShock]);
 
   const generateReport = useCallback(async () => {
     if (!simulationResult) return;
@@ -77,15 +80,17 @@ export const SimulationProvider = ({ children }) => {
   const applyPreset = useCallback((preset) => {
     setActivePreset(preset);
     const presets = {
-      ukraine:   { cpo: 5.5,  rpo: 5.5   },
-      indonesia: { cpo: 100,  rpo: 13.75 },
-      budget2025:{ cpo: 20,   rpo: 32.5  },
-      default:   { cpo: 100,  rpo: 13.75 },
+      ukraine:    { cpo: 5.0,  rpo: 12.5,  shock: 40.0 },
+      indonesia:  { cpo: 5.0,  rpo: 12.5,  shock: 28.0 },
+      budget2024: { cpo: 27.5, rpo: 37.5,  shock: 0.0  },
+      zero_duty:  { cpo: 0.0,  rpo: 0.0,   shock: 0.0  },
+      default:    { cpo: 20.0, rpo: 32.5,  shock: 0.0  },
     };
-    const { cpo, rpo } = presets[preset] || presets.default;
+    const { cpo, rpo, shock } = presets[preset] || presets.default;
     setCpoDuty(cpo);
     setRpoDuty(rpo);
-    return { cpo, rpo };
+    setGlobalShock(shock);
+    return { cpo, rpo, shock };
   }, []);
 
   const clearError = useCallback(() => setError(null), []);
@@ -94,6 +99,7 @@ export const SimulationProvider = ({ children }) => {
     <SimulationContext.Provider value={{
       cpoDuty, setCpoDuty,
       rpoDuty, setRpoDuty,
+      globalShock, setGlobalShock,
       simulationResult, setSimulationResult,
       isLoading,
       policyReport, setPolicyReport,

@@ -17,6 +17,7 @@ class OilNitiEngine:
         self.baseline_import_volume_lakh_tons = 85.0  # annual
         self.domestic_production_share = float(self.elasticities["domestic_production_share"])
         self._finding_sweet_spot = False  # recursion guard
+        self._sweet_spot_cache = None  # cache the sweet-spot result
 
     def simulate(self, new_cpo_duty: float, new_rpo_duty: float, global_cpo_shock_pct: float = 0.0):
         """
@@ -228,13 +229,17 @@ class OilNitiEngine:
         }
 
     def _find_sweet_spot(self):
-        """Find duty that balances farmer protection and consumer affordability"""
+        """Find duty that balances farmer protection and consumer affordability.
+        Cached to avoid re-running 18+ simulations on every request."""
+        if self._sweet_spot_cache is not None:
+            return self._sweet_spot_cache
+
         self._finding_sweet_spot = True  # prevent recursion
         best_duty = 20.0
         best_balance = float('inf')
         
         try:
-            for duty in np.arange(5, 50, 2.5):  # coarser step = faster
+            for duty in np.arange(5, 50, 1.0):  # finer step since we cache
                 result = self.simulate(duty, duty + 12.5)
                 f_score = result["national_summary"]["farmer_protection_score"]
                 c_score = result["national_summary"]["consumer_affordability_score"]
@@ -246,4 +251,5 @@ class OilNitiEngine:
         finally:
             self._finding_sweet_spot = False  # always reset even if error
         
-        return round(float(best_duty), 1)
+        self._sweet_spot_cache = round(float(best_duty), 1)
+        return self._sweet_spot_cache

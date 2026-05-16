@@ -1,3 +1,4 @@
+//transformers.js
 /**
  * Transforms the real backend response into the shape the frontend components expect.
  * Backend keys  →  Frontend keys
@@ -30,13 +31,15 @@ export function transformSimulationResponse(raw, cpoDuty, rpoDuty) {
     const consumerCostPerMonth = Math.abs(s.consumer_monthly_delta_rs);
     const ratio = farmerBenefitPerMonth / (consumerCostPerMonth + 1); // +1 avoid div/0
 
+    // net_score range from our backend is roughly 190-260
+    // Use relative thresholds instead of absolute
     let net;
-    if (s.net_score > 500) net = 'farmer';
-    else if (s.net_score < -200) net = 'consumer';
-    else net = 'mixed';
+    if (s.net_score > 240) net = 'farmer';
+    else if (s.net_score > 215) net = 'mixed';
+    else net = 'consumer';
 
-    // magnitude 0–1 based on absolute net_score (cap at 2000)
-    const magnitude = Math.min(1, Math.abs(s.net_score) / 2000);
+    // magnitude 0-1 based on net_score range 190-260
+    const magnitude = Math.min(1, Math.max(0, (s.net_score - 190) / 70));
 
     return {
       state: s.state,

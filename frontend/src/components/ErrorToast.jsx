@@ -1,3 +1,4 @@
+//ErrorToast.jsx
 import React, { useEffect } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 

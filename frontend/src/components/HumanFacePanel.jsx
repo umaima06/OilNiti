@@ -1,3 +1,5 @@
+//HumanFacePanel.jsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import IndiaMap from './IndiaMap';
@@ -298,6 +300,91 @@ const HumanFacePanel = () => {
 
         {/* India Map */}
         <IndiaMap />
+
+        {/* State Leaderboard Table */}
+        {res && res.state_impact && res.state_impact.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            <div style={{ marginBottom: 16 }}>
+              <div className="section-label">State-Level Impact Leaderboard</div>
+              <h3 style={{
+                fontFamily: "'Sora', sans-serif",
+                fontSize: 16,
+                fontWeight: 600,
+                color: '#e8eaf2',
+                marginTop: 4,
+              }}>
+                All {res.state_impact.length} States & UTs — Ranked by Net Impact
+              </h3>
+            </div>
+            <div style={{
+              overflowX: 'auto',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+              }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <th style={{ textAlign: 'left', padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.08em', fontSize: 10 }}>#</th>
+                    <th style={{ textAlign: 'left', padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.08em', fontSize: 10 }}>STATE</th>
+                    <th style={{ textAlign: 'center', padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.08em', fontSize: 10 }}>NET IMPACT</th>
+                    <th style={{ textAlign: 'right', padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.08em', fontSize: 10 }}>FARMER Δ/YR</th>
+                    <th style={{ textAlign: 'right', padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.08em', fontSize: 10 }}>CONSUMER Δ/MO</th>
+                    <th style={{ textAlign: 'right', padding: '10px 14px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.08em', fontSize: 10 }}>FARMERS (L)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...res.state_impact]
+                    .sort((a, b) => b.magnitude - a.magnitude)
+                    .map((s, i) => {
+                      const netColor = s.net === 'farmer' ? '#10b981' : s.net === 'consumer' ? '#ef4444' : '#f59e0b';
+                      const netLabel = s.net === 'farmer' ? '🌾 Farmer' : s.net === 'consumer' ? '🏠 Consumer' : '⚖ Mixed';
+                      return (
+                        <tr key={s.state} style={{
+                          background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
+                          borderBottom: '1px solid rgba(255,255,255,0.04)',
+                          transition: 'background 0.15s',
+                        }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)'}
+                        >
+                          <td style={{ padding: '10px 14px', color: 'rgba(255,255,255,0.25)' }}>{i + 1}</td>
+                          <td style={{ padding: '10px 14px', color: '#e8eaf2', fontWeight: 500 }}>{s.state}</td>
+                          <td style={{ padding: '10px 14px', textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '3px 10px',
+                              borderRadius: 999,
+                              fontSize: 10,
+                              fontWeight: 600,
+                              background: `${netColor}15`,
+                              color: netColor,
+                              border: `1px solid ${netColor}30`,
+                            }}>
+                              {netLabel}
+                            </span>
+                          </td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', color: '#10b981', fontWeight: 600 }}>
+                            +₹{(s.farmer_annual_delta ?? Math.round(s.magnitude * 3200)).toLocaleString('en-IN')}
+                          </td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', color: '#ef4444', fontWeight: 600 }}>
+                            +₹{Math.round(s.consumer_monthly_delta ?? s.magnitude * 287)}
+                          </td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', color: 'rgba(255,255,255,0.5)' }}>
+                            {s.oilseed_farmers_lakh ?? '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
