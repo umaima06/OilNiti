@@ -5,6 +5,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine
 } from 'recharts';
+import { API_BASE } from '../config';
 
 const EVENT_ANNOTATIONS = [
   { date: '2018-06-01', label: 'Peak Protection', detail: 'CPO hit 44% — highest in a decade' },
@@ -62,7 +63,7 @@ const DutyHistoryChart = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/duty-history')
+    fetch(`${API_BASE}/duty-history`)
       .then(r => r.json())
       .then(d => {
         setData(d.timeline || []);

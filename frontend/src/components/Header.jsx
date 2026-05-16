@@ -1,10 +1,11 @@
 //Header.jsx
 import { useState, useEffect, React } from 'react';
+import { API_BASE } from '../config';
 const Header = () => {
   const [livePrice, setLivePrice] = useState(null);
   
   useEffect(() => {
-    fetch('http://localhost:8000/live-price')
+    fetch(`${API_BASE}/live-price`)
     .then(r => r.json())
     .then(setLivePrice)
     .catch(() => {});

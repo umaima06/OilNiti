@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { mockSimulationResult, mockPolicyReport } from '../mockData';
 import { transformSimulationResponse, transformReportResponse } from '../utils/transformers';
+import { API_BASE } from '../config';
 
 const SimulationContext = createContext(null);
 
@@ -22,7 +23,7 @@ export const SimulationProvider = ({ children }) => {
     setError(null);
     setPolicyReport(null);
     try {
-      const res = await fetch('http://localhost:8000/simulate', {
+      const res = await fetch(`${API_BASE}/simulate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpo_duty: cpo, rpo_duty: rpo, global_cpo_shock_pct: shock }),
@@ -50,7 +51,7 @@ export const SimulationProvider = ({ children }) => {
         cpo_duty: simulationResult._cpoDuty ?? cpoDuty,
         rpo_duty: simulationResult._rpoDuty ?? rpoDuty,
       };
-      const res = await fetch('http://localhost:8000/generate-report', {
+      const res = await fetch(`${API_BASE}/generate-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

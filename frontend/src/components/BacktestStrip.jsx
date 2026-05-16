@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../config';
 
 export default function BacktestStrip() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/backtest')
+    fetch(`${API_BASE}/backtest`)
       .then(r => r.json())
       .then(setData)
       .catch(() => {});

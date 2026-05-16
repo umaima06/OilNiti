@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { transformSimulationResponse } from '../utils/transformers';
+import { API_BASE } from '../config';
 
 const SUGGESTED_QUESTIONS = [
   "Who gets hurt the most by this duty?",
@@ -131,7 +132,7 @@ const NitiBot = () => {
       // Build current simulation data for context
       const currentSimData = simulationResult?._raw || null;
 
-      const res = await fetch('http://localhost:8000/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
