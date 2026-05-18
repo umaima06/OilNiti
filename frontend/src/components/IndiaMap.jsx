@@ -72,24 +72,22 @@ const NORMALIZE = (name) => {
 
 const getStateColor = (stateData, defaultMode) => {
   if (!stateData) {
-    return defaultMode ? '#1e2d45' : '#1a2235';
+    return defaultMode ? '#e5e7eb' : '#d1d5db';
   }
   const { net, magnitude } = stateData;
   if (net === 'farmer') {
-    // Emerald gradient based on magnitude
     const alpha = 0.3 + magnitude * 0.7;
-    return `rgba(16,185,129,${alpha})`;
+    return `rgba(22,163,74,${alpha})`;
   }
   if (net === 'consumer') {
-    // Crimson gradient based on magnitude
     const alpha = 0.3 + magnitude * 0.7;
-    return `rgba(239,68,68,${alpha})`;
+    return `rgba(234,88,12,${alpha})`;
   }
   if (net === 'mixed') {
     const alpha = 0.3 + magnitude * 0.7;
     return `rgba(245,158,11,${alpha})`;
   }
-  return '#1e2d45';
+  return '#e5e7eb';
 };
 
 const TooltipBox = memo(({ tooltip }) => {
@@ -107,15 +105,15 @@ const TooltipBox = memo(({ tooltip }) => {
         minWidth: 180,
       }}
     >
-      <div style={{ fontWeight: 700, color: '#e8eaf2', marginBottom: 8, fontSize: 13 }}>
+      <div style={{ fontWeight: 700, color: '#111', marginBottom: 8, fontSize: 13 }}>
         {state}
       </div>
       {data ? (
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Net Impact</span>
+            <span style={{ color: '#9ca3af' }}>Net Impact</span>
             <span style={{
-              color: data.net === 'farmer' ? '#10b981' : data.net === 'consumer' ? '#ef4444' : '#f59e0b',
+              color: data.net === 'farmer' ? '#16a34a' : data.net === 'consumer' ? '#ea580c' : '#d97706',
               fontWeight: 600,
               textTransform: 'capitalize',
             }}>
@@ -123,32 +121,32 @@ const TooltipBox = memo(({ tooltip }) => {
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Farmer Δ/yr</span>
-            <span style={{ color: '#10b981' }}>
+            <span style={{ color: '#9ca3af' }}>Farmer Δ/yr</span>
+            <span style={{ color: '#16a34a' }}>
               +₹{(data.farmer_annual_delta ?? Math.round(data.magnitude * 3200)).toLocaleString('en-IN')}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 4 }}>
-            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Consumer Δ/mo</span>
-            <span style={{ color: '#ef4444' }}>
+            <span style={{ color: '#9ca3af' }}>Consumer Δ/mo</span>
+            <span style={{ color: '#ea580c' }}>
               +₹{Math.round(data.consumer_monthly_delta ?? data.magnitude * 287)}
             </span>
           </div>
           {data.oilseed_farmers_lakh && (
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-              <span style={{ color: 'rgba(255,255,255,0.5)' }}>Farmers</span>
-              <span style={{ color: 'rgba(255,255,255,0.7)' }}>{data.oilseed_farmers_lakh}L</span>
+              <span style={{ color: '#9ca3af' }}>Farmers</span>
+              <span style={{ color: '#111' }}>{data.oilseed_farmers_lakh}L</span>
             </div>
           )}
         </>
       ) : (
-        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>No impact data available</div>
+        <div style={{ color: '#9ca3af', fontSize: 11 }}>No impact data available</div>
       )}
     </div>
   );
 });
 
-const IndiaMap = () => {
+const IndiaMap = ({ onStateClick }) => {
   const { simulationResult } = useSimulation();
   const [tooltip, setTooltip] = useState(null);
 
@@ -176,10 +174,9 @@ const IndiaMap = () => {
         <div>
           <div className="section-label">Spatial Impact Distribution</div>
           <h3 style={{
-            fontFamily: "'Sora', sans-serif",
-            fontSize: 16,
-            fontWeight: 600,
-            color: '#e8eaf2',
+            fontSize: 18,
+            fontWeight: 700,
+            color: '#111',
             marginTop: 4,
           }}>
             State-by-State Impact Distribution
@@ -190,19 +187,19 @@ const IndiaMap = () => {
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(16,185,129,0.8)' }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Farmer benefit</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#555' }}>Farmer benefit</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(239,68,68,0.8)' }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Consumer burden</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#555' }}>Consumer burden</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(245,158,11,0.8)' }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Mixed impact</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#555' }}>Mixed impact</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 14, height: 14, borderRadius: 3, background: '#1e2d45' }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>No data</span>
+            <div style={{ width: 14, height: 14, borderRadius: 3, background: '#e5e7eb' }} />
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#555' }}>No data</span>
           </div>
         </div>
       </div>
@@ -211,13 +208,13 @@ const IndiaMap = () => {
         <div style={{
           textAlign: 'center',
           fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 11,
-          color: 'rgba(255,255,255,0.2)',
+          fontSize: 12,
+          color: '#9ca3af',
           marginBottom: 12,
           padding: '8px 16px',
-          background: 'rgba(255,255,255,0.02)',
+          background: '#fff',
           borderRadius: 6,
-          border: '1px solid rgba(255,255,255,0.04)',
+          border: '1px solid #e5e7eb',
         }}>
           Move the sliders and run a simulation to see human impact across India's states.
         </div>
@@ -225,9 +222,9 @@ const IndiaMap = () => {
 
       {/* Map container */}
       <div style={{
-        background: 'rgba(255,255,255,0.01)',
+        background: '#fff',
         borderRadius: 12,
-        border: '1px solid rgba(255,255,255,0.05)',
+        border: '1px solid #e5e7eb',
         overflow: 'hidden',
         position: 'relative',
       }}>
@@ -254,8 +251,8 @@ const IndiaMap = () => {
                     key={geo.rsmKey}
                     geography={geo}
                     fill={fill}
-                    stroke="#0a0e1a"
-                    strokeWidth={0.8}
+                    stroke="#d1d5db"
+                    strokeWidth={0.5}
                     style={{
                       default: {
                         outline: 'none',
@@ -263,10 +260,10 @@ const IndiaMap = () => {
                       },
                       hover: {
                         fill: stateData
-                          ? (stateData.net === 'farmer' ? '#34d399'
-                            : stateData.net === 'consumer' ? '#f87171'
+                          ? (stateData.net === 'farmer' ? '#4ade80'
+                            : stateData.net === 'consumer' ? '#fb923c'
                             : '#fbbf24')
-                          : '#243349',
+                          : '#d1d5db',
                         outline: 'none',
                         cursor: 'pointer',
                       },
@@ -274,6 +271,19 @@ const IndiaMap = () => {
                     }}
                     onMouseMove={(evt) => handleMouseMove(geo, evt)}
                     onMouseLeave={handleMouseLeave}
+                    onClick={() => {
+                      if (onStateClick && stateData) {
+                        onStateClick(stateData);
+                      } else if (onStateClick) {
+                        onStateClick({
+                          state: normalized,
+                          net: 'consumer', // fallback
+                          magnitude: 0,
+                          farmer_annual_delta: 0,
+                          consumer_monthly_delta: 0
+                        });
+                      }
+                    }}
                   />
                 );
               })

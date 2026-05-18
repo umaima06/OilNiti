@@ -2,106 +2,65 @@
 
 import React, { useState, useCallback } from 'react';
 import { useSimulation } from '../context/SimulationContext';
+import { ProGate, ProBadge } from './ProGate';
+import { DEMO_MODE, IS_PRO } from '../config';
 
 const PRESETS = [
-  { id: 'ukraine', label: 'Ukraine War 2022', emoji: '🔴', cpo: 5.0, rpo: 12.5, shock: 40.0 },
-  { id: 'indonesia', label: 'Indonesia Export Ban', emoji: '🟡', cpo: 5.0, rpo: 12.5, shock: 28.0 },
-  { id: 'budget2024', label: 'Sept 2024 Duty Hike', emoji: '🟢', cpo: 27.5, rpo: 37.5, shock: 0.0 },
-  { id: 'zero_duty', label: 'Zero Duty Scenario', emoji: '⚪', cpo: 0.0, rpo: 0.0, shock: 0.0 },
-  { id: 'default', label: 'Reset to Current', emoji: '🔵', cpo: 20.0, rpo: 32.5, shock: 0.0 },
+  { id: 'ukraine', label: 'Ukraine War 2022', desc: 'Global CPO spike +40%', emoji: '🔴', cpo: 5.0, rpo: 12.5, shock: 40.0 },
+  { id: 'indonesia', label: 'Indonesia Export Ban', desc: 'Supply disruption +28%', emoji: '🟡', cpo: 5.0, rpo: 12.5, shock: 28.0 },
+  { id: 'budget2024', label: 'Sept 2024 Duty Hike', desc: 'Farmer protection focus', emoji: '🟢', cpo: 27.5, rpo: 37.5, shock: 0.0 },
+  { id: 'zero_duty', label: 'Zero Duty Scenario', desc: 'Full import liberalization', emoji: '⚪', cpo: 0.0, rpo: 0.0, shock: 0.0 },
+  { id: 'default', label: 'Reset to Current', desc: 'FY25 baseline rates', emoji: '🔵', cpo: 20.0, rpo: 32.5, shock: 0.0 },
 ];
 
-const SliderControl = ({ label, subLabel, value, min, max, step = 0.25, onChange, color = '#f59e0b' }) => {
+const SliderControl = ({ label, subLabel, value, min, max, step = 0.25, onChange, color = '#16a34a' }) => {
   const pct = ((value - min) / (max - min)) * 100;
 
   return (
     <div style={{ flex: 1 }}>
-      {/* Label */}
-      <div style={{ marginBottom: 16 }}>
-        <div className="section-label">{subLabel}</div>
-        <div style={{
-          fontFamily: "'Sora', sans-serif",
-          fontSize: 15,
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.85)',
-          marginTop: 4,
-          lineHeight: 1.3,
-        }}>
-          {label}
+      {/* Label row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+        <div>
+          <div className="section-label">{subLabel}</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#111', marginTop: 2 }}>
+            {label}
+          </div>
         </div>
-      </div>
-
-      {/* Big value display */}
-      <div style={{
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 64,
-        fontWeight: 600,
-        color: color,
-        lineHeight: 1,
-        marginBottom: 20,
-        textShadow: `0 0 30px ${color}40`,
-        letterSpacing: '-0.02em',
-      }}>
-        {Number(value).toFixed(2).replace(/\.00$/, '')}
-        <span style={{ fontSize: 28, color: `${color}80`, marginLeft: 4 }}>%</span>
+        <div style={{
+          fontSize: 36,
+          fontWeight: 800,
+          color: color,
+          lineHeight: 1,
+          letterSpacing: '-1px',
+        }}>
+          {Number(value).toFixed(value % 1 ? 2 : 0)}%
+        </div>
       </div>
 
       {/* Slider */}
-      <div style={{ position: 'relative' }}>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
-          aria-label={label}
-          style={{
-            width: '100%',
-            background: `linear-gradient(to right, ${color} ${pct}%, #1e2d45 ${pct}%)`,
-          }}
-        />
-        {/* Min/max labels */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: 8,
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 10,
-          color: 'rgba(255,255,255,0.25)',
-          letterSpacing: '0.05em',
-        }}>
-          <span>{min}%</span>
-          <span>{max}%</span>
-        </div>
-      </div>
-
-      {/* Quick tick marks */}
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        aria-label={label}
+        style={{
+          width: '100%',
+          background: `linear-gradient(to right, ${color} ${pct}%, #e5e7eb ${pct}%)`,
+        }}
+      />
       <div style={{
         display: 'flex',
-        gap: 6,
-        marginTop: 12,
-        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginTop: 6,
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: 10,
+        color: '#9ca3af',
       }}>
-        {[0, 25, 50, 75, 100].filter(v => v <= max).map(v => (
-          <button
-            key={v}
-            onClick={() => onChange(v)}
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              padding: '3px 8px',
-              borderRadius: 4,
-              border: `1px solid ${Math.abs(value - v) < 0.1 ? color : '#1e2d45'}`,
-              background: Math.abs(value - v) < 0.1 ? `${color}15` : 'transparent',
-              color: Math.abs(value - v) < 0.1 ? color : 'rgba(255,255,255,0.25)',
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
-          >
-            {v}%
-          </button>
-        ))}
+        <span>{min}%</span>
+        <span>{max}%</span>
       </div>
     </div>
   );
@@ -121,11 +80,13 @@ const TariffControlPanel = () => {
   } = useSimulation();
 
   const [localPreset, setLocalPreset] = useState(null);
+  const [customScenarios, setCustomScenarios] = useState([]);
+  const [newScenarioName, setNewScenarioName] = useState('');
+  const isProUnlocked = DEMO_MODE || IS_PRO;
 
   const handlePreset = useCallback((preset) => {
     const { cpo, rpo, shock } = applyPreset(preset.id);
     setLocalPreset(preset.id);
-    // Auto-trigger simulation after a tick
     setTimeout(() => runSimulation(cpo, rpo, shock), 50);
   }, [applyPreset, runSimulation]);
 
@@ -134,156 +95,131 @@ const TariffControlPanel = () => {
     runSimulation(cpoDuty, rpoDuty, globalShock);
   };
 
+  const handleSaveScenario = () => {
+    if (!newScenarioName.trim()) return;
+    const newScenario = {
+      id: `custom_${Date.now()}`,
+      label: newScenarioName,
+      desc: `CPO: ${cpoDuty}%, RPO: ${rpoDuty}%`,
+      emoji: '⭐',
+      cpo: cpoDuty,
+      rpo: rpoDuty,
+      shock: globalShock,
+    };
+    setCustomScenarios([...customScenarios, newScenario]);
+    setNewScenarioName('');
+  };
+
   return (
-    <section id="control" style={{ marginBottom: 40 }}>
-      <div className="panel-card" style={{
-        background: 'linear-gradient(135deg, #0d1325 0%, #111827 100%)',
-        borderColor: '#1e2d45',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Background pattern */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: 400,
-          height: 400,
-          background: 'radial-gradient(circle at center, rgba(245,158,11,0.04) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
+    <section id="control" style={{ marginBottom: 0 }}>
+      {/* Section heading */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 32, fontWeight: 800, color: '#111', letterSpacing: '-0.5px' }}>
+          Tariff Control Room
+        </h2>
+        <p style={{ fontSize: 15, color: '#555', marginTop: 6 }}>
+          Adjust import duties and simulate policy outcomes in real time.
+        </p>
+      </div>
 
-        {/* Header */}
-        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div>
-            <div className="section-label">Panel 01 · Fiscal Instrument Controls</div>
-            <h2 style={{
-              fontFamily: "'Sora', sans-serif",
-              fontSize: 22,
-              fontWeight: 700,
-              color: '#e8eaf2',
-              marginTop: 4,
-            }}>
-              Tariff Control Room
-            </h2>
-            <p style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 11,
-              color: 'rgba(255,255,255,0.3)',
-              marginTop: 6,
-              letterSpacing: '0.05em',
-            }}>
-              Adjust import duties and simulate policy outcomes in real time
-            </p>
-          </div>
-          <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
-            color: 'rgba(255,255,255,0.15)',
-            textAlign: 'right',
-            letterSpacing: '0.1em',
-          }}>
-            CUSTOMS TARIFF ACT<br />SCHEDULE I · CHAPTER 15
-          </div>
-        </div>
-
-        {/* Sliders */}
+      <div className="panel-card">
+        {/* Sliders in 2-col */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1px 1fr',
-          gap: 0,
+          gridTemplateColumns: '1fr 1fr',
+          gap: 48,
           marginBottom: 32,
         }}
           className="slider-grid"
         >
-          <div style={{ paddingRight: 40 }}>
-            <SliderControl
-              label="Crude Palm Oil (CPO) Import Duty"
-              subLabel="CPO · HS Code 1511.10"
-              value={cpoDuty}
-              min={0}
-              max={150}
-              step={0.5}
-              onChange={setCpoDuty}
-              color="#f59e0b"
-            />
-          </div>
-
-          {/* Divider */}
-          <div style={{ background: '#1e2d45', margin: '0 0' }} />
-
-          <div style={{ paddingLeft: 40 }}>
-            <SliderControl
-              label="Refined, Bleached & Deodorised (RPO) Import Duty"
-              subLabel="RPO · HS Code 1511.90"
-              value={rpoDuty}
-              min={0}
-              max={100}
-              step={0.25}
-              onChange={setRpoDuty}
-              color="#6366f1"
-            />
-          </div>
-        </div>
-
-        {/* Global Shock Slider */}
-        <div style={{
-          marginBottom: 32,
-          padding: '20px 24px',
-          borderRadius: 12,
-          background: 'rgba(239,68,68,0.04)',
-          border: '1px solid rgba(239,68,68,0.15)',
-        }}>
           <SliderControl
-            label="Global CPO Price Shock"
-            subLabel="External · Supply chain disruptions, war, export bans"
-            value={globalShock}
-            min={-30}
-            max={60}
-            step={1}
-            onChange={setGlobalShock}
-            color="#ef4444"
+            label={<>Crude Palm Oil (CPO) <ProBadge /></>}
+            subLabel="HS Code 1511.10"
+            value={cpoDuty}
+            min={0}
+            max={isProUnlocked ? 150 : 30}
+            step={0.5}
+            onChange={setCpoDuty}
+            color="#16a34a"
           />
-          <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10,
-            color: 'rgba(255,255,255,0.25)',
-            marginTop: 8,
-            letterSpacing: '0.05em',
-          }}>
-            {globalShock > 0
-              ? `⚠ Simulating a +${globalShock}% global price spike (e.g., war, export ban)`
-              : globalShock < 0
-              ? `📉 Simulating a ${globalShock}% global price drop (e.g., bumper harvest)`
-              : '→ No external shock — simulation uses only duty changes'}
-          </div>
+          <SliderControl
+            label={<>Refined Palm Oil (RPO) <ProBadge /></>}
+            subLabel="HS Code 1511.90"
+            value={rpoDuty}
+            min={0}
+            max={isProUnlocked ? 100 : 30}
+            step={0.25}
+            onChange={setRpoDuty}
+            color="#16a34a"
+          />
         </div>
 
-        {/* Tariff gap indicator */}
+        {/* Global Shock */}
+        <ProGate featureName="Custom Global Price Shock">
+          <div style={{
+            marginBottom: 32,
+            padding: '24px',
+            borderRadius: 12,
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+          }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#991b1b', marginBottom: 16 }}>
+              [PRO] Custom shock
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#7f1d1d', marginBottom: 8 }}>Type</label>
+                <select style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #fca5a5', background: '#fff', fontSize: 14 }}>
+                  <option>Rupee depreciation</option>
+                  <option>Domestic Production Drop</option>
+                  <option>Global CPO Price Spike</option>
+                  <option>FTA Duty Elimination</option>
+                  <option>Custom Combination</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#7f1d1d', marginBottom: 8 }}>Intensity (%)</label>
+                <input 
+                  type="number" 
+                  value={globalShock} 
+                  onChange={(e) => setGlobalShock(Number(e.target.value))}
+                  style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #fca5a5', background: '#fff', fontSize: 14 }}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '10px 0' }}>
+                  <input type="checkbox" checked readOnly style={{ width: 16, height: 16, accentColor: '#dc2626' }} />
+                  <span style={{ fontSize: 14, fontWeight: 500, color: '#7f1d1d' }}>Apply to simulation</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </ProGate>
+
+        {/* Tariff gap */}
         <div style={{
           marginBottom: 28,
-          padding: '12px 16px',
+          padding: '14px 20px',
           borderRadius: 8,
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.05)',
+          background: '#f9fafb',
+          border: '1px solid #e5e7eb',
           display: 'flex',
           alignItems: 'center',
           gap: 24,
           flexWrap: 'wrap',
         }}>
           <div>
-            <div className="section-label">Tariff Gap (CPO − RPO)</div>
+            <div style={{ fontSize: 11, fontWeight: 500, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>Tariff Gap</div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 20,
-              fontWeight: 600,
-              color: cpoDuty - rpoDuty > 0 ? '#10b981' : '#ef4444',
+              fontSize: 24,
+              fontWeight: 800,
+              color: cpoDuty - rpoDuty > 0 ? '#16a34a' : '#dc2626',
               marginTop: 2,
             }}>
               {(cpoDuty - rpoDuty).toFixed(2)}pp
             </div>
           </div>
-          <div style={{ flex: 1, fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>
+          <div style={{ flex: 1, fontSize: 13, color: '#9ca3af' }}>
             {cpoDuty - rpoDuty > 20
               ? '⚠ High gap incentivises import of refined oil, hurting domestic refiners'
               : cpoDuty - rpoDuty < 0
@@ -292,27 +228,68 @@ const TariffControlPanel = () => {
           </div>
         </div>
 
-        {/* Shock Scenario Presets */}
+        {/* Scenario Cards — 5 cards grid */}
         <div style={{ marginBottom: 28 }}>
-          <div className="section-label" style={{ marginBottom: 12 }}>Shock Scenario Presets</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 12 }}>Shock Scenario Presets</div>
           <div style={{
-            display: 'flex',
-            gap: 10,
-            flexWrap: 'wrap',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+            gap: 12,
           }}>
-            {PRESETS.map((preset) => (
+            {[...PRESETS, ...customScenarios].map((preset) => (
               <button
                 key={preset.id}
                 className={`preset-pill ${localPreset === preset.id ? 'active' : ''}`}
                 onClick={() => handlePreset(preset)}
                 title={`CPO: ${preset.cpo}% | RPO: ${preset.rpo}%`}
               >
-                <span style={{ fontSize: 14 }}>{preset.emoji}</span>
-                {preset.label}
+                <span style={{ fontSize: 20 }}>{preset.emoji}</span>
+                <span style={{ fontWeight: 600, color: '#111' }}>{preset.label}</span>
+                <span style={{ fontSize: 12, color: '#9ca3af' }}>{preset.desc}</span>
               </button>
             ))}
           </div>
         </div>
+
+        {/* Custom Scenario Builder */}
+        <ProGate featureName="Custom Scenario Builder">
+          <div style={{
+            marginBottom: 32,
+            padding: '20px 24px',
+            borderRadius: 12,
+            background: '#f9fafb',
+            border: '1px solid #e5e7eb',
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: 12,
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 6 }}>Save Current Configuration as Scenario</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Worst Case Monsoon"
+                value={newScenarioName}
+                onChange={e => setNewScenarioName(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: 6,
+                  border: '1px solid #d1d5db',
+                  fontSize: 14
+                }}
+              />
+            </div>
+            <button 
+              className="btn-primary"
+              onClick={handleSaveScenario}
+              disabled={!newScenarioName.trim()}
+              style={{ padding: '10px 20px', whiteSpace: 'nowrap' }}
+            >
+              ⭐ Save Scenario
+            </button>
+          </div>
+        </ProGate>
 
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -325,10 +302,9 @@ const TariffControlPanel = () => {
             {isLoading ? (
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                 <span style={{
-                  width: 16,
-                  height: 16,
-                  border: '2px solid rgba(10,14,26,0.3)',
-                  borderTop: '2px solid #0a0e1a',
+                  width: 16, height: 16,
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderTop: '2px solid #fff',
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite',
                   display: 'inline-block',
@@ -340,38 +316,20 @@ const TariffControlPanel = () => {
             )}
           </button>
 
-          <button
-            className="btn-ghost"
-            onClick={useMockData}
-            title="Load mock data for UI development"
-            style={{ whiteSpace: 'nowrap' }}
-          >
+          <button className="btn-ghost" onClick={useMockData} style={{ whiteSpace: 'nowrap' }}>
             ⚗ Use Mock Data
           </button>
         </div>
 
-        {/* Inline style for spin */}
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @media (max-width: 768px) {
+            .slider-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
       </div>
-
-      {/* Responsive slider grid styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .slider-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .slider-grid > div:nth-child(2) {
-            display: none;
-          }
-          .slider-grid > div:last-child {
-            padding-left: 0 !important;
-            padding-top: 32px;
-          }
-          .slider-grid > div:first-child {
-            padding-right: 0 !important;
-          }
-        }
-      `}</style>
     </section>
   );
 };

@@ -1,0 +1,95 @@
+/* PRO STYLES */
+.demo-banner {
+  background: #16a34a;
+  color: white;
+  text-align: center;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  letter-spacing: 0.5px;
+}
+
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #78350f;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.pro-gate {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.blurred-content {
+  filter: blur(4px) grayscale(50%);
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 10;
+  padding: 24px;
+}
+
+.lock-overlay span {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.lock-overlay h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.lock-overlay p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.btn-pro {
+  background: #111;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-pro:hover {
+  background: #000;
+  transform: translateY(-1px);
+}

@@ -1,6 +1,6 @@
 //App.jsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SimulationProvider } from './context/SimulationContext';
 import Header from './components/Header';
 import TariffControlPanel from './components/TariffControlPanel';
@@ -11,152 +11,178 @@ import DutyHistoryChart from './components/DutyHistoryChart';
 import NitiBot from './components/NitiBot';
 import ErrorToast from './components/ErrorToast';
 import BacktestStrip from './components/BacktestStrip';
+import { UpgradeModal } from './components/UpgradeModal';
+import ApiAccess from './components/ApiAccess';
+import { DEMO_MODE } from './config';
 
-const SectionDivider = ({ panelNum, label }) => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 16,
-    margin: '0 0 32px',
-  }}>
-    <div style={{
-      fontFamily: "'IBM Plex Mono', monospace",
-      fontSize: 10,
-      color: 'rgba(255,255,255,0.12)',
-      letterSpacing: '0.15em',
-      flexShrink: 0,
-    }}>
-      §{panelNum}
-    </div>
-    <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, #1e2d45 0%, transparent 100%)' }} />
-  </div>
+const SectionDivider = () => (
+  <div style={{ height: 1, background: '#e5e7eb', margin: '48px 0' }} />
 );
 
 function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const onLocationChange = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', onLocationChange);
+    return () => window.removeEventListener('popstate', onLocationChange);
+  }, []);
+
+  if (currentPath === '/api-access') {
+    return (
+      <SimulationProvider>
+        <div style={{ minHeight: '100vh', background: '#ffffff' }}>
+          {DEMO_MODE && (
+            <div className="demo-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>🔓 Demo Mode Active — All Pro features unlocked for evaluation</span>
+              <button 
+                onClick={() => {
+                  localStorage.removeItem('OILNITI_DEMO');
+                  window.location.reload();
+                }}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '4px 8px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+              >
+                Lock Features
+              </button>
+            </div>
+          )}
+          <Header />
+          <ApiAccess />
+          <UpgradeModal />
+        </div>
+      </SimulationProvider>
+    );
+  }
+
   return (
     <SimulationProvider>
-      {/* SEO meta is in index.html */}
-      <div style={{ minHeight: '100vh', background: 'var(--navy)' }}>
+      <div style={{ minHeight: '100vh', background: '#ffffff' }}>
+        {DEMO_MODE && (
+          <div className="demo-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>🔓 Demo Mode Active — All Pro features unlocked for evaluation</span>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('OILNITI_DEMO');
+                window.location.reload();
+              }}
+              style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '4px 8px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+            >
+              Lock Features
+            </button>
+          </div>
+        )}
         <Header />
 
-        {/* Hero banner */}
+        {/* HERO — ONE dark section (deep forest green) */}
         <div style={{
-          background: 'linear-gradient(180deg, #080c18 0%, #0a0e1a 100%)',
-          borderBottom: '1px solid #1e2d45',
-          padding: '28px 32px 24px',
+          background: '#0d2818',
+          padding: '64px 32px 56px',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
-          <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 16,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              marginBottom: 16,
             }}>
-              <div>
-                <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 10,
-                  color: 'rgba(255,255,255,0.25)',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  marginBottom: 8,
-                }}>
-                  India's First Policy Conscience Machine
-                </div>
-                <h1 style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 'clamp(24px, 4vw, 42px)',
-                  fontWeight: 800,
-                  color: '#e8eaf2',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.02em',
-                }}>
-                  Edible Oil Tariff{' '}
-                  <span style={{ color: '#f59e0b' }}>Simulation Engine</span>
-                </h1>
-                <p style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 12,
-                  color: 'rgba(255,255,255,0.3)',
-                  marginTop: 10,
-                  letterSpacing: '0.04em',
-                  maxWidth: 600,
-                }}>
-                  Adjust CPO &amp; RPO import duties → model price impacts → quantify farmer welfare &amp; consumer burden across India's 36 states &amp; UTs.
-                </p>
-              </div>
-
-              {/* Stats strip */}
-              <div style={{
-                display: 'flex',
-                gap: 1,
-                background: '#1e2d45',
-                borderRadius: 10,
-                overflow: 'hidden',
-                border: '1px solid #1e2d45',
-              }}>
-                {[
-                  { value: '₹1.5L Cr', label: 'Palm oil market' },
-                  { value: '8 Crore', label: 'Farm families' },
-                  { value: '140 Cr', label: 'Consumers' },
-                  { value: '36', label: 'States & UTs' },
-                ].map((stat) => (
-                  <div key={stat.label} style={{
-                    padding: '14px 20px',
-                    background: '#0d1325',
-                    textAlign: 'center',
-                  }}>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 17,
-                      fontWeight: 600,
-                      color: '#f59e0b',
-                      lineHeight: 1,
-                    }}>
-                      {stat.value}
-                    </div>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9,
-                      color: 'rgba(255,255,255,0.2)',
-                      letterSpacing: '0.08em',
-                      marginTop: 5,
-                    }}>
-                      {stat.label.toUpperCase()}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              India's First Policy Conscience Machine
             </div>
+            <h1 style={{
+              fontSize: 'clamp(36px, 5vw, 56px)',
+              fontWeight: 900,
+              color: '#ffffff',
+              lineHeight: 1.05,
+              letterSpacing: '-1.5px',
+              maxWidth: 700,
+            }}>
+              Edible Oil Tariff{' '}
+              <span style={{ color: '#4ade80' }}>Simulation Engine</span>
+            </h1>
+            <p style={{
+              fontSize: 16,
+              color: 'rgba(255,255,255,0.5)',
+              marginTop: 20,
+              lineHeight: 1.7,
+              maxWidth: 560,
+            }}>
+              Adjust CPO &amp; RPO import duties → model price impacts → quantify farmer welfare &amp; consumer burden across India's 36 states &amp; UTs.
+            </p>
           </div>
         </div>
 
-        {/* Main content */}
+        {/* STATS STRIP — full-width white row */}
+        <div style={{
+          borderBottom: '1px solid #e5e7eb',
+          background: '#ffffff',
+        }}>
+          <div style={{
+            maxWidth: 1200,
+            margin: '0 auto',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            textAlign: 'center',
+          }}>
+            {[
+              { value: '₹1.5L Cr', label: 'Palm Oil Market' },
+              { value: '8 Crore', label: 'Farm Families' },
+              { value: '140 Cr', label: 'Consumers Impacted' },
+              { value: '36', label: 'States & UTs' },
+            ].map((stat, i) => (
+              <div key={stat.label} style={{
+                padding: '28px 16px',
+                borderRight: i < 3 ? '1px solid #e5e7eb' : 'none',
+              }}>
+                <div style={{
+                  fontSize: 32,
+                  fontWeight: 800,
+                  color: '#16a34a',
+                  lineHeight: 1,
+                  letterSpacing: '-1px',
+                }}>
+                  {stat.value}
+                </div>
+                <div style={{
+                  fontSize: 13,
+                  color: '#9ca3af',
+                  marginTop: 6,
+                }}>
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* MAIN CONTENT — white body */}
         <main style={{
-          maxWidth: 1400,
+          maxWidth: 1200,
           margin: '0 auto',
-          padding: '40px 32px',
+          padding: '48px 32px 80px',
         }}>
           <TariffControlPanel />
 
-          <SectionDivider panelNum="02" label="Market Signals" />
+          <SectionDivider />
           <PriceImpactPanel />
 
-          <SectionDivider panelNum="03" label="Human Face" />
+          <SectionDivider />
           <HumanFacePanel />
 
-          <SectionDivider panelNum="04" label="AI Conscience" />
+          <SectionDivider />
           <ConscienceDashboard />
 
-          <SectionDivider panelNum="05" label="Historical Context" />
+          <SectionDivider />
           <DutyHistoryChart />
 
           {/* Footer */}
           <footer style={{
-            marginTop: 60,
-            paddingTop: 32,
-            borderTop: '1px solid #1e2d45',
+            marginTop: 48,
+            paddingTop: 24,
+            borderTop: '1px solid #e5e7eb',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -166,8 +192,8 @@ function App() {
             <BacktestStrip />
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.1)',
+              fontSize: 11,
+              color: '#9ca3af',
             }}>
               Built with ♥ for Indian Kisans &amp; Ghars · SummerSaaS 2026
             </div>
@@ -176,6 +202,7 @@ function App() {
 
         <NitiBot />
         <ErrorToast />
+        <UpgradeModal />
       </div>
     </SimulationProvider>
   );

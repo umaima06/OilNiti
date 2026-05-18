@@ -34,6 +34,7 @@ class ReportRequest(BaseModel):
     simulation_result: dict
     cpo_duty: float
     rpo_duty: float
+    report_type: str = "think_tank"
 
 # ─── ROUTES ───────────────────────────────────────────────────────
 
@@ -119,48 +120,173 @@ async def generate_report(req: ReportRequest):
     pi = req.simulation_result.get("price_impact", {})
     ti = req.simulation_result.get("trade_impact", {})
     an = req.simulation_result.get("atma_nirbhar", {})
-
-    prompt = f"""You are a senior policy analyst at NITI Aayog, India. Generate a concise, formal 2-page policy brief based on this simulation.
-
+    fi = req.simulation_result.get("fiscal_impact", {})
+    
+    # Sort states by farmer income delta
+    states_data = req.simulation_result.get("state_impacts", [])
+    top_farmer_states = sorted(states_data, key=lambda x: x.get('farmer_annual_delta', 0), reverse=True)[:5]
+    top_consumer_states = sorted(states_data, key=lambda x: x.get('consumer_monthly_delta', 0), reverse=True)[:3]
+    
+    # Format data blocks for the prompt
+    farmer_data = "\n".join([f"- {s['state']}: {s.get('oilseed_farmers_lakh', 0)} lakh farmers, +₹{s.get('farmer_annual_delta', 0)}/season" for s in top_farmer_states])
+    consumer_data = "\n".join([f"- {s['state']}: +₹{s.get('consumer_monthly_delta', 0)}/month ({s.get('percent_of_income_impact', 0)}% of income)" for s in top_consumer_states])
+    
+    common_data = f"""
 SIMULATION PARAMETERS:
-- CPO Import Duty: {req.cpo_duty}% (Baseline: 20%)
-- RPO Import Duty: {req.rpo_duty}% (Baseline: 32.5%)
-
-KEY RESULTS:
+- CPO Duty: {req.cpo_duty}% 
+- RPO Duty: {req.rpo_duty}%  
 - Palm oil retail price change: {pi.get('palm_oil_change_pct', 0)}%
-- Import volume change: {ti.get('import_volume_change_pct', 0)}%
+- Soybean oil price change: {pi.get('soybean_oil_change_pct', 0)}%
 - Mustard oil price change: {pi.get('mustard_oil_change_pct', 0)}%
+- Sunflower oil price change: {pi.get('sunflower_oil_change_pct', 0)}%
+- Import volume change: {ti.get('import_volume_change_pct', 0)}%
+- Fiscal Revenue Delta: +Rs {ns.get('customs_revenue_delta_crore', 0):,.0f} crore
 - Total oilseed farmers affected: {ns.get('total_oilseed_farmers_lakh', 0)} lakh
-- Average farmer annual income change: Rs {ns.get('avg_farmer_annual_delta_rs', 0):,.0f}
-- Low-income household monthly oil cost change: Rs {ns.get('low_income_monthly_delta_rs', 0):.2f}
-- This is {ns.get('low_income_monthly_delta_pct_income', 0):.2f}% of their monthly income
-- Atma Nirbhar self-reliance score: {an.get('score', 0)}% ({an.get('delta', 0):+.1f}% change)
-- Customs revenue impact: Rs {ns.get('customs_revenue_delta_crore', 0):,.0f} crore
+- Low-income monthly burden: Rs {ns.get('low_income_monthly_delta_rs', 0):.0f}/month
+- Low-income burden % of income: {ns.get('low_income_monthly_delta_pct_income', 0):.1f}%
 - Farmer Protection Score: {ns.get('farmer_protection_score', 0)}/100
 - Consumer Affordability Score: {ns.get('consumer_affordability_score', 0)}/100
-- OilNiti Recommended Duty: {ns.get('recommended_cpo_duty', 20)}%
+- Recommended CPO Duty (sweet spot): {ns.get('recommended_cpo_duty', 22)}%
+- Atma Nirbhar self-reliance: {an.get('score', 35)}% (delta: {an.get('delta', 0):+.1f}%)
 
-Write a policy brief with these exact sections:
-1. EXECUTIVE SUMMARY (3 sentences max)
-2. FARMER WELFARE IMPACT (mention specific states like Rajasthan, MP, UP)
-3. CONSUMER BURDEN ANALYSIS (focus on low-income households)
-4. TRADE AND SELF-RELIANCE (import dependence implications)
-5. OILNITI RECOMMENDATION (recommended duty with clear rationale)
+TOP 5 FARMER-BENEFIT STATES:
+{farmer_data}
 
-Tone: Formal, factual, government-style. Use Rs symbol. Keep each section to 4-5 sentences. Total length: around 400 words."""
+TOP 3 CONSUMER-BURDEN STATES:
+{consumer_data}"""
 
-    completion = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=1000,
-        temperature=0.3
-    )
+    if req.report_type == 'journalist':
+        system_prompt = f"""You are generating an OilNiti PRESS INTELLIGENCE BRIEF.
+Audience: Business Standard, Reuters, Mint, BQ Prime.
+Tone: Punchy, accessible, journalistic. Lead with the most shocking human statistic.
 
-    return {
-        "report": completion.choices[0].message.content,
-        "generated_at": "2026-05-13",
-        "model": "llama-3.1-8b-instant"
-    }
+{common_data}
+
+FORMAT (follow this EXACTLY):
+# OILNITI PRESS INTELLIGENCE BRIEF
+**For editorial use — not for direct publication**
+CPO Duty: {req.cpo_duty}% | RPO Duty: {req.rpo_duty}% | Generated: 18 May 2026
+
+## THE HEADLINE NUMBER
+(Lead with: "A family earning Rs X/month in [state] will pay Rs Y more every month for cooking oil. That's Z% of their entire income.")
+
+## Ready-to-use Story Angles
+**ANGLE 1 — Consumer Impact:** (one paragraph, quotable)
+**ANGLE 2 — Farmer Welfare:** (one paragraph, quotable)
+**ANGLE 3 — Policy Gap:** (one paragraph, quotable)
+
+## Key Quotable Statistics
+(Bullet list: price impact, farmer benefit, consumer burden, fiscal gain, most burdened state, most benefited state)
+
+## State-by-State One-Liners
+(One line per major state: Bihar, Rajasthan, Tamil Nadu, Kerala, UP — ready to drop into any article)
+
+## Model Credibility
+"OilNiti's structural causal model predicted the September 2024 price rise with 3.6% error — validated against DFPD retail price data."
+
+Use real numbers from the simulation data. No filler. Every sentence should be publishable."""
+
+    elif req.report_type == 'trader':
+        system_prompt = f"""You are generating an OilNiti TRADE INTELLIGENCE BRIEF.
+Audience: SEA India members, edible oil importers, procurement desks.
+Tone: Market-focused, actionable, no political language. Lead with the procurement recommendation.
+
+{common_data}
+
+FORMAT (follow this EXACTLY):
+# OILNITI TRADE INTELLIGENCE BRIEF
+**MARKET SENSITIVE — INTERNAL USE ONLY**
+Simulation: CPO {req.cpo_duty}% | RPO {req.rpo_duty}% | Generated: 18 May 2026
+
+## PROCUREMENT RECOMMENDATION
+| Field | Value |
+|---|---|
+| ACTION | BUY NOW / HOLD / WAIT (based on data) |
+| WINDOW | X weeks at current price |
+| EXPECTED PRICE MOVE | +X% |
+| OPTIMAL OIL | (lowest projected increase) |
+| SUBSTITUTE RATIO | X:Y palm:soybean |
+
+## Price Impact by Oil Type
+(Markdown table: Oil Type | Current Price | Post-Duty Projected | Change %)
+Include: CPO, RBD Palmolein, Soybean Oil, Mustard Oil, Sunflower Oil
+
+## Import Volume Impact
+(Current monthly CPO import, projected post-duty, value change, port impact)
+
+## Duty Implementation Timeline
+- Week 1-2: Gazette notification → port price adjustment
+- Week 3-4: Wholesale price transmission
+- Week 5-8: Full retail impact visible
+- Week 9-12: Import volume stabilizes
+- OPTIMAL IMPORT WINDOW: Next 10-14 days
+
+## Substitution Recommendation
+(Recommended mix shift, estimated cost saving per tonne)
+
+Use market terminology only. Every number must come from the simulation data."""
+
+    else:
+        system_prompt = f"""You are generating an OilNiti POLICY BRIEF (RESTRICTED CIRCULATION).
+Audience: Think tanks (ORF, ICRIER, PRS Legislative Research), NITI Aayog.
+Tone: Formal policy language. Data-dense. Lead with methodology credibility.
+
+{common_data}
+
+FORMAT (follow this EXACTLY):
+# OILNITI POLICY BRIEF — RESTRICTED CIRCULATION
+**Prepared for**: Policy Research Use
+**Simulation Parameters**: CPO Duty {req.cpo_duty}% | RPO Duty {req.rpo_duty}%
+**Generated**: 18 May 2026 | **Model Version**: OilNiti 1.0
+**Backtested Accuracy**: 3.6% error (Sept 2024 validation)
+
+### Section 1 — Policy Context
+(2 sentences: what changed, why it matters, what this brief covers)
+
+### Section 2 — Executive Summary
+(Exactly 5 bullet points: price change, import volume, farmers benefited, consumer burden peak, fiscal gain)
+
+### Section 3 — Farmer Welfare Analysis
+(Markdown table: Top 5 states ranked by farmer income delta — State | Crop | Farmers Affected | Income Delta | MSP Status)
+Then one paragraph of analysis.
+
+### Section 4 — Consumer Burden Analysis
+(Markdown table: Income deciles — Income Group | Monthly Oil Spend | Extra Cost | % of Income | Risk Level 🔴🟡🟢)
+Then top 3 most burdened states with numbers.
+
+### Section 5 — Fiscal Impact
+(Customs revenue breakdown: current import value, volume reduction, new import value, duty revenue, previous revenue, NET FISCAL GAIN)
+
+### Section 6 — OilNiti Recommendation
+(Recommended CPO duty range, RPO range, confidence level, rationale paragraph, consumer protection measure)
+
+### Section 7 — Policy Risk Flags
+(3 risk flags with ⚠️ prefix: festive season timing, supply shock, MSP breach gap)
+
+Use real numbers from the simulation data. No filler. Every claim must be backed by data."""
+
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": "Generate the report now based on the provided simulation data and instructions. Do not include any meta-commentary, just output the report directly."}
+            ],
+            model="llama-3.1-8b-instant",
+            temperature=0.4,
+            max_tokens=3000,
+        )
+        report_text = response.choices[0].message.content
+        
+        # Add the mandatory attribution footer
+        footer = "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nThis report was generated by OilNiti's structural causal model\nbacktested to 3.6% error against September 2024 DFPD data.\nNot for redistribution without attribution.\noil-niti.vercel.app"
+        
+        return {
+            "report": report_text + footer,
+            "generated_at": "2026-05-18",
+            "model": "llama-3.1-8b-instant"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
 @app.get("/live-price")
 def live_price():

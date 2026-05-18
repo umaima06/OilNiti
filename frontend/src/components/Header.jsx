@@ -13,160 +13,97 @@ const Header = () => {
 
   return (
     <header style={{
-      background: 'linear-gradient(180deg, #080c18 0%, #0a0e1a 100%)',
-      borderBottom: '1px solid #1e2d45',
+      background: '#ffffff',
+      borderBottom: '1px solid #e5e7eb',
       padding: '0 32px',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      backdropFilter: 'blur(12px)',
     }}>
       <div style={{
-        maxWidth: 1400,
+        maxWidth: 1200,
         margin: '0 auto',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 72,
+        height: 64,
         gap: 16,
       }}>
-        {/* Logo + tagline */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          {/* Logo mark */}
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 24 }}>🛢</span>
           <div style={{
-            width: 42,
-            height: 42,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 4px 16px rgba(245,158,11,0.4)',
+            fontSize: 22,
+            fontWeight: 800,
+            color: '#111',
+            letterSpacing: '-0.5px',
+            lineHeight: 1,
           }}>
-            <span style={{ fontSize: 22 }}>🛢</span>
-          </div>
-          <div>
-            <div style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 26,
-              fontWeight: 800,
-              color: '#f59e0b',
-              lineHeight: 1,
-              letterSpacing: '-0.02em',
-            }}>
-              OilNiti
-            </div>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.35)',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              marginTop: 3,
-              whiteSpace: 'nowrap',
-            }}>
-              India's Policy Conscience Machine · Edible Oil Tariffs
-            </div>
+            Oil<span style={{ color: '#16a34a' }}>Niti</span>
           </div>
         </div>
+
+        {/* Nav links */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          {[
+            { label: 'Control', href: '/#control' },
+            { label: 'Impact', href: '/#impact' },
+            { label: 'Human Face', href: '/#human' },
+            { label: 'AI Insights', href: '/#conscience' },
+            { label: 'API Access', href: '/api-access' },
+          ].map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              style={{
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#555',
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#16a34a'}
+              onMouseLeave={(e) => e.target.style.color = '#555'}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
         {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          {/* Ministry badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Live price */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '6px 14px',
-            borderRadius: 6,
-            border: '1px solid rgba(245,158,11,0.2)',
-            background: 'rgba(245,158,11,0.05)',
-          }}>
-            <span style={{ fontSize: 14 }}>🇮🇳</span>
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.4)',
-              letterSpacing: '0.08em',
-            }}>
-              Ministry of Finance · Trade Wing
-            </span>
-          </div>
-
-          {/* Live price badge */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '8px 16px',
-            borderRadius: 8,
-            background: 'rgba(16,185,129,0.08)',
-            border: '1px solid rgba(16,185,129,0.25)',
+            gap: 6,
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 12,
+            fontWeight: 500,
+            color: '#16a34a',
           }}>
             <span className="live-dot" aria-hidden="true" />
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 12,
-              fontWeight: 600,
-              color: '#34d399',
-              }}>
-                Global CPO: ₹{livePrice?.price_inr_per_kg ?? '...'}/kg {livePrice?.trend_icon ?? ''}
-            </span>
-            
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.3)',
-            }}>
-              · Live
-            </span>
+            CPO: ₹{livePrice?.price_inr_per_kg ?? '...'}/kg {livePrice?.trend_icon ?? ''}
           </div>
-        </div>
-      </div>
 
-      {/* Sub-nav strip */}
-      <div style={{
-        maxWidth: 1400,
-        margin: '0 auto',
-        display: 'flex',
-        gap: 0,
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-      }}>
-        {[
-          { label: 'TARIFF CONTROL', href: '#control' },
-          { label: 'PRICE IMPACT', href: '#impact' },
-          { label: 'HUMAN FACE', href: '#human' },
-          { label: 'AI CONSCIENCE', href: '#conscience' },
-        ].map((item) => (
+          {/* CTA button */}
           <a
-            key={item.label}
-            href={item.href}
+            href="#conscience"
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10,
-              letterSpacing: '0.15em',
-              color: 'rgba(255,255,255,0.3)',
+              background: '#16a34a',
+              color: '#fff',
+              fontSize: 13,
+              fontWeight: 600,
+              padding: '8px 18px',
+              borderRadius: 8,
               textDecoration: 'none',
-              padding: '8px 20px',
-              borderRight: '1px solid rgba(255,255,255,0.05)',
-              transition: 'color 0.2s',
+              transition: 'background 0.2s',
             }}
-            onMouseEnter={(e) => e.target.style.color = '#f59e0b'}
-            onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.3)'}
+            onMouseEnter={(e) => e.target.style.background = '#15803d'}
+            onMouseLeave={(e) => e.target.style.background = '#16a34a'}
           >
-            {item.label}
+            Generate Report →
           </a>
-        ))}
-        <div style={{ flex: 1 }} />
-        <div style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 9,
-          color: 'rgba(255,255,255,0.15)',
-          padding: '8px 20px',
-          letterSpacing: '0.1em',
-        }}>
-          SUMMERSAAS 2026 · OPEN INNOVATION
         </div>
       </div>
     </header>

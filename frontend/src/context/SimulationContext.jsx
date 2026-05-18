@@ -40,16 +40,17 @@ export const SimulationProvider = ({ children }) => {
     }
   }, [cpoDuty, rpoDuty, globalShock]);
 
-  const generateReport = useCallback(async () => {
+  const generateReport = useCallback(async (reportType = 'think_tank') => {
     if (!simulationResult) return;
     setReportLoading(true);
     setError(null);
     try {
-      // Backend expects: { simulation_result: <raw>, cpo_duty: number, rpo_duty: number }
+      // Backend expects: { simulation_result: <raw>, cpo_duty: number, rpo_duty: number, report_type: string }
       const body = {
         simulation_result: simulationResult._raw || simulationResult,
         cpo_duty: simulationResult._cpoDuty ?? cpoDuty,
         rpo_duty: simulationResult._rpoDuty ?? rpoDuty,
+        report_type: reportType
       };
       const res = await fetch(`${API_BASE}/generate-report`, {
         method: 'POST',
@@ -74,8 +75,10 @@ export const SimulationProvider = ({ children }) => {
     setPolicyReport(null);
   }, []);
 
-  const useMockReport = useCallback(() => {
-    setPolicyReport(mockPolicyReport);
+  const useMockReport = useCallback((reportType = 'think_tank') => {
+    // We will update mockPolicyReport to be an object with keys: think_tank, journalist, trader
+    // For now we fallback to standard mockPolicyReport
+    setPolicyReport(mockPolicyReport[reportType] || mockPolicyReport);
   }, []);
 
   const applyPreset = useCallback((preset) => {
