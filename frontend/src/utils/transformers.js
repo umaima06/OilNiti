@@ -127,72 +127,10 @@ export function transformSimulationResponse(raw, cpoDuty, rpoDuty) {
   };
 }
 
-/**
- * Transforms the generate-report response.
- * Backend returns { report: "markdown text", generated_at, model }
- * Frontend PolicyReport expects structured sections.
- */
 export function transformReportResponse(raw, simulationResult) {
   if (!raw) return null;
-
-  // If backend returns a structured object, use it directly
-  if (raw.executive_summary) return raw;
-
-  // Otherwise parse the markdown text into sections
-  const text = raw.report || '';
-
-  // Extract sections by heading
-  const sections = {};
-  const lines = text.split('\n');
-  let currentSection = null;
-  let buffer = [];
-
-  for (const line of lines) {
-    const heading = line.match(/^#+\s+(.+)$/) || line.match(/^(\d+\.\s+[A-Z\s]+)$/);
-    if (heading) {
-      if (currentSection) sections[currentSection] = buffer.join('\n').trim();
-      currentSection = heading[1].trim().toLowerCase()
-        .replace(/[^a-z0-9]/g, '_')
-        .replace(/_+/g, '_');
-      buffer = [];
-    } else {
-      buffer.push(line);
-    }
-  }
-  if (currentSection) sections[currentSection] = buffer.join('\n').trim();
-
-  const ns = simulationResult?._raw?.national_summary || {};
-  const sr = simulationResult || {};
-
-  // Build structured report from parsed text + simulation data
-  return {
-    executive_summary:
-      sections['executive_summary'] ||
-      sections['1__executive_summary'] ||
-      Object.values(sections)[0] ||
-      text.slice(0, 400),
-
-    farmer_welfare: {
-      table: (sr.farmer_impact?.state_breakdown || []).map((s) => ({
-        state: s.state,
-        farmers_lakhs: s.farmers_lakhs,
-        income_delta: s.income_delta,
-      })),
-    },
-
-    consumer_burden: {
-      table: sr.consumer_impact?.decile_breakdown || [],
-    },
-
-    recommended_cpo_duty: ns.recommended_cpo_duty || sr._cpoDuty || 20,
-    recommended_rpo_duty: ns.recommended_cpo_duty ? ns.recommended_cpo_duty + 12.5 : sr._rpoDuty || 32.5,
-
-    rationale:
-      sections['oilniti_recommendation'] ||
-      sections['5__oilniti_recommendation'] ||
-      sections['recommendation'] ||
-      `A CPO duty of ${ns.recommended_cpo_duty || 20}% balances farmer income support with consumer affordability, based on OilNiti's causal policy model.`,
-
-    fiscal_impact_crore: sr.fiscal_impact_crore || Math.round(ns.customs_revenue_delta_crore || 0),
-  };
+  // The backend now returns { report: "markdown string", ... }
+  // PolicyReport.jsx expects either a string or an object with a .report property.
+  // We can just return the raw response directly since it fits the new pattern.
+  return raw;
 }
